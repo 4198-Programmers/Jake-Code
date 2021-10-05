@@ -6,9 +6,6 @@
  * 
  *************************************************************/
 
-
-
-
 package frc.robot;
 
 import com.revrobotics.CANEncoder;
@@ -19,7 +16,9 @@ import edu.wpi.first.wpilibj.Joystick;
 
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class Robot extends TimedRobot
 {
@@ -40,6 +39,19 @@ public class Robot extends TimedRobot
   DifferentialDrive fullDrive = new DifferentialDrive(leftDrive, rightDrive);
   DifferentialDrive turnDrive = new DifferentialDrive(leftTurn, rightTurn);
   
+  private Command autonomousCommand = null;
+
+  private SendableChooser<Command> chooser = new SendableChooser<>();
+
+  private final Command AutoOption = new Auto(this);
+
+  public Command getAutonomousCommand() 
+   {
+     return chooser.getSelected();
+   }
+
+
+
 
   public static CANEncoder backLEnc = new CANEncoder(backL);
   public static CANEncoder backREnc = new CANEncoder(backR);
@@ -53,6 +65,9 @@ public class Robot extends TimedRobot
   double bumperMultiplier=.5;
   double speedInvert = 1;
   int speedlock = 1;
+
+
+public double timer;
   @Override
   public void robotInit()
   {
@@ -65,6 +80,11 @@ public class Robot extends TimedRobot
     frontL.setOpenLoopRampRate(ramprate);
     backR.setOpenLoopRampRate(ramprate);
     frontR.setOpenLoopRampRate(ramprate);
+
+    chooser.setDefaultOption("AutoOption0", AutoOption);
+    chooser.addOption("AutoOption1", AutoOption);
+    chooser.addOption("AutoOption2", AutoOption);
+    chooser.addOption("AutoOption3", AutoOption);
 
 
   }
@@ -84,7 +104,6 @@ public class Robot extends TimedRobot
                        ((-1*ps4drive.getRawAxis(4))+(controlMultiplyer*ps4drive.getRawAxis(1))),//weiner
                        true);
     */
-
     fullDrive.tankDrive(leftDriveVar,rightDriveVar,true);
     
 
@@ -110,7 +129,7 @@ public class Robot extends TimedRobot
         note:sometimes when increasing, the first decrease will also increase
         but after will not, vice versa as well
         */
-        if(ps4drive.getRawButtonPressed(5)&&bumperMultiplier>0)
+        if(ps4drive.getRawButtonPressed(5) && bumperMultiplier > 0)
         {
           bumperMultiplier-=.05;
           System.out.println(controlMultiplyer);
@@ -128,13 +147,98 @@ public class Robot extends TimedRobot
 // If going to fail
 // Dont;
   @Override
-  public void autonomousInit() {
+  public void autonomousInit() 
+  {
+    autonomousCommand = this.getAutonomousCommand();
+
+    if (autonomousCommand != null) 
+    {
+      autonomousCommand.start();
+    }
 
   }
 
   @Override
-  public void autonomousPeriodic() {
-    
+  public void autonomousPeriodic() 
+  {
+
+    //CommandScheduler.getInstance().run();
+
+    //int decision = 2;
+    /***
+     * decision table (eventually make switch case)
+     * 1 is forward     1 go - 3 stop
+     * 2 is backward    1 go - 3 stop
+     * 3 is spin CW     3 go - 3 stop
+     * 4 is spin CCW    3 go - 3 stop
+     * 5 is complex move
+     * 
+     * 
+     *  
+     ***/
+
+
+
+    /*
+     switch (decision)
+     {
+       
+        //one:forward
+        case 1:
+        {
+          auto.AutonomousForward(1000, .3);
+          auto.AutonomousStop(3000);
+        }
+        break;
+        //two:backward
+        case 2:
+        {
+          auto.AutonomousForward(1000, -.3);
+          auto.AutonomousStop(3000);
+        }
+        break;
+        //three:clockwise
+        case 3:
+        {
+          auto.AutonomousSpin(3000, .3);
+          auto.AutonomousStop(3000);
+        }
+        break;
+        //four counter clockwise
+        case 4:
+        {
+          auto.AutonomousSpin(3000, -.3);
+          auto.AutonomousStop(3000);
+        }
+        break;
+
+        case 5:
+        {
+
+        }
+        break;
+
+
+
+
+        default:
+        {
+
+        }
+        break;
+     }
+    if(decision==1)
+    {
+      auto.AutonomousForward(1000, .3);
+      auto.AutonomousStop(3000);
+    }
+
+    if(decision==2)
+    {
+      auto.AutonomousSpin(3000, 0.3);
+      auto.AutonomousStop(3000);
+    }
+    */
   }
 
   @Override
